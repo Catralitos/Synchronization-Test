@@ -18,20 +18,24 @@ namespace Synchronization
 
         private static void Main(string[] args)
         {
-            Synchronize();
-            
-            //First we set the paths and the period according to the program args
+            //First we set the paths and store the period according to the program args
             _sourcePath = args[0];
             _replicaPath = args[1];
-            SetPeriod(int.Parse(args[2]));
+            int periodArg = int.Parse(args[2]);
             _logPath = args[3];
-
+            
             //We initialize lists to save data for comparison between previous and current states
             _previousSourceFilesNames = new List<string>();
             _previousSourceFiles = new List<byte[]>();
             _previousSourceDirectories = new List<string>();
             _directoriesToDelete = new List<string>();
                 
+            //After we've set the paths and initialized the lists to store the previous state of source
+            //We run the first sync 
+            Synchronize();
+            //And then we start the timer
+            SetPeriod(periodArg);
+            
             //Period only runs while the program is running, so I have it waiting for an input with readline
             //When the user inputs any command, the period stops and the application is terminated
             Console.WriteLine("\nPress any key to exit the application...\n");
@@ -85,7 +89,7 @@ namespace Synchronization
                 Directory.CreateDirectory(_replicaPath + "\\" + directoryName);
                 
                 //And we add it to our logging stringbuilder
-                sb.Append(DateTime.Now + ": Created directory " + directoryName + " in replica folder.\n");
+                sb.Append(DateTime.Now + " -  Created directory " + directoryName + " in replica folder.\n");
             }
 
             //And we store the previous directories
@@ -144,7 +148,7 @@ namespace Synchronization
                 File.WriteAllBytes(_replicaPath + "\\" + fileName, bytes);
                 
                 //And we add it to our logging stringbuilder
-                sb.Append(DateTime.Now + ": Created file " + fileName + " in replica folder.\n");
+                sb.Append(DateTime.Now + " - Created file " + fileName + " in replica folder.\n");
             }
             
             //Delete the files to be deleted in the replica folder
@@ -154,7 +158,7 @@ namespace Synchronization
                 File.Delete(_replicaPath + "\\"+ fileName);
                 
                 //And we add it to our logging stringbuilder
-                sb.Append(DateTime.Now + ": Deleted file " + fileName + " in replica folder.\n");            
+                sb.Append(DateTime.Now + " - Deleted file " + fileName + " in replica folder.\n");            
             }
             
             //Now that we deleted all the files marked for deletion, there's no chance of trying to delete a directory that still has files
@@ -164,7 +168,7 @@ namespace Synchronization
                 Directory.Delete(_replicaPath + "\\" + directoryName);
                     
                 //And we add it to our logging stringbuilder
-                sb.Append(DateTime.Now + ": Deleted directory " + directoryName + " in replica folder.\n");
+                sb.Append(DateTime.Now + " - Deleted directory " + directoryName + " in replica folder.\n");
             }
             
             //Copy and overwrite the modified files to the replica folder
@@ -174,7 +178,7 @@ namespace Synchronization
                 File.Copy(_sourcePath + "\\" + fileName, _replicaPath + "\\" + fileName, true);
                 
                 //And we add it to our logging stringbuilder
-                sb.Append(DateTime.Now + ": Updated file " + fileName + " in replica folder.\n");            
+                sb.Append(DateTime.Now + " - Updated file " + fileName + " in replica folder.\n");            
             }
             
             //Update the previous files
